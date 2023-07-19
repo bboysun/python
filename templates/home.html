@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat and Article Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .navbar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .navbar li {
+            margin-right: 10px;
+        }
+
+        .navbar li a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #000;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .navbar li.active a {
+            background-color: #ddd;
+        }
+
+        /** 聊天样式 **/
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .user-message {
+            color: #000000;
+        }
+
+        .bot-message {
+            color: #0052cc;
+        }
+
+        .message-content {
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .user-message .message-content {
+            background-color: #e5f1ff;
+        }
+
+        .bot-message .message-content {
+            background-color: #f0f0f0;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-container button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: #0052cc;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /** 文本摘要提取样式 **/
+        .article-input-container,
+        .output-container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .article-input-container label,
+        .output-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .article-input-container textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #extract-summary-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: #0052cc;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #summary-result {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 200px;
+        }
+
+        .tab {
+            display: none;
+        }
+
+        .tab.active {
+            display: block;
+        }
+
+        /**分割线**/
+        .title-flex {
+            display: flex;
+            align-items: center;
+            font-size: 0.4rem;
+            color: #ddd;
+        }
+
+        .title-flex::before,
+        .title-flex::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .title-flex::before {
+            margin-right: 0.25rem;
+        }
+
+        .title-flex::after {
+            margin-left: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <ul class="tab-menu">
+            <li class="tab-menu-item active" data-tab="chat"><a href="#">聊天室</a></li>
+            <li class="tab-menu-item" data-tab="article"><a href="#">文本摘要提取分析</a></li>
+        </ul>
+    </div>
+    <div class="title-flex">华丽的分割线</div>
+
+    <div class="tab-content">
+        <div class="tab chat active">
+            <div class="container">
+                <!-- 聊天功能的内容 -->
+                <div class="message user-message">
+                    <div class="message-content">
+                        你好！我能为你做些什么吗？
+                    </div>
+                </div>
+                <div class="message bot-message">
+                    <div class="message-content">
+                        当然，很高兴为你服务！
+                    </div>
+                </div>
+                <!-- Add more messages dynamically using JavaScript -->
+                <div class="input-container">
+                    <input type="text" id="user-input" placeholder="Type your message...">
+                    <button id="send-button">发送</button>
+                </div>
+            </div>
+        </div>
+        <div class="tab article">
+            <div class="container">
+                <!-- 文章解析功能的内容 -->
+                <div class="article-input-container">
+                    <label for="input-text">用户输入：</label>
+                    <textarea id="input-text" rows="8" placeholder="在这里输入文本内容"></textarea>
+                </div>
+                <div class="button-container">
+                    <button id="extract-summary-button">提取摘要</button>
+                </div>
+                <div class="output-container">
+                    <label for="summary-result">摘要输出：</label>
+                    <div id="summary-result"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var tabMenuItems = document.querySelectorAll('.tab-menu-item');
+        var tabs = document.querySelectorAll('.tab');
+
+        // 点击选项卡时切换活动状态
+        tabMenuItems.forEach(function (menuItem) {
+            menuItem.addEventListener('click', function () {
+                var selectedTab = this.getAttribute('data-tab');
+
+                // 移除所有选项卡的活动状态
+                tabMenuItems.forEach(function (item) {
+                    item.classList.remove('active');
+                });
+                tabs.forEach(function (tab) {
+                    tab.classList.remove('active');
+                });
+
+                // 添加选中选项卡的活动状态
+                this.classList.add('active');
+                document.querySelector('.tab.' + selectedTab).classList.add('active');
+            });
+        });
+    </script>
+
+    <script>
+        // 聊天功能的代码
+
+        document.querySelector('.tab.chat .container #send-button').addEventListener('click', function () {
+            var userInput = document.querySelector('.tab.chat .container #user-input').value;
+
+            // Display user message
+            var userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user-message');
+            var userMessageContent = document.createElement('div');
+            userMessageContent.classList.add('message-content');
+            userMessageContent.textContent = userInput;
+            userMessage.appendChild(userMessageContent);
+            document.querySelector('.tab.chat .container').appendChild(userMessage);
+
+            // Clear user input
+            document.querySelector('.tab.chat .container #user-input').value = '';
+
+            // Send user input to server and handle bot response
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userInput: userInput })
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Error processing request');
+                    }
+                })
+                .then(function (data) {
+                    // Display bot message
+                    var botMessage = document.createElement('div');
+                    botMessage.classList.add('message', 'bot-message');
+                    var botMessageContent = document.createElement('div');
+                    botMessageContent.classList.add('message-content');
+                    botMessageContent.textContent = data.botResponse;
+                    botMessage.appendChild(botMessageContent);
+                    document.querySelector('.tab.chat .container').appendChild(botMessage);
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        });
+    </script>
+
+    <script>
+        // 文章解析功能的代码
+        document.addEventListener('DOMContentLoaded', function () {
+            var extractSummaryButton = document.getElementById('extract-summary-button');
+            extractSummaryButton.addEventListener('click', function () {
+                var inputText = document.getElementById('input-text').value;
+
+                // 创建一个 XMLHttpRequest 对象
+                var xhr = new XMLHttpRequest();
+                var url = '/extraction'; // 后端接口的 URL
+
+                // 设置请求方法和 URL
+                xhr.open('POST', url, true);
+
+                // 设置请求头
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                // 处理响应
+                xhr.onreadystatechange = function () {
+                    try {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                var response = JSON.parse(xhr.responseText);
+                                var summaryResult = document.getElementById('summary-result');
+                                summaryResult.innerText = response.botResponse;
+                            } else {
+                                throw new Error('Error extraction request');
+                            }
+                        }
+                    } catch (error) {
+                        throw new Error('Error extraction');
+                    }
+                };
+
+                // 发送请求
+                xhr.send(JSON.stringify({ input: inputText }));
+            });
+        });
+    </script>
+</body>
+
+</html>
