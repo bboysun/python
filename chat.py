@@ -6,9 +6,10 @@
 # @last-modified 2023-07-10T17:20:30
 #
 import openai
+from util import get_api_key_from_yaml, file_path
 
 
-openai.api_key = 'key'
+openai.api_key = get_api_key_from_yaml(file_path)
 
 
 chat_history = [{'role': 'system', 'content': 'You are a helpful assistant.'}]

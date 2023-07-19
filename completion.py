@@ -6,9 +6,10 @@
 # @last-modified 2023-07-19T09:40:14
 #
 import openai
+from util import get_api_key_from_yaml, file_path
 
 
-openai.api_key = 'key'
+openai.api_key = get_api_key_from_yaml(file_path)
 
 
 def completion_process(input_prompt):

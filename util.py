@@ -5,15 +5,21 @@
 # @created 2023-07-19T14:31:03
 # @last-modified 2023-07-19T14:31:03
 #
+import yaml
 
-def read_file():
-    file_path = 'path/to/your/file.txt'  # 替换为你的文件路径
 
+# 读取本地 YAML 文件并获取 api_key 的值
+file_path = 'config/application.yaml' 
+
+
+def get_api_key_from_yaml(file_path):
     try:
         with open(file_path, 'r') as file:
-            file_content = file.read()
-        return file_content
+            yaml_data = yaml.safe_load(file)
+            api_key = yaml_data.get('openai').get('key')
+            return api_key
     except FileNotFoundError:
-        return 'File not found'
+        raise FileNotFoundError("application yaml file cannot find")
     except IOError:
-        return 'Error reading file'
+        raise IOError("read application yaml file IO error")
+
