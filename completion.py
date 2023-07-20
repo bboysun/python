@@ -20,7 +20,7 @@ def completion_process(input_prompt):
     data = {
         'prompt': prompt,
         # 'text': input_text,
-        'max_tokens': 500,
+        'max_tokens': 2500,
         'temperature': 0.5
     }
 
